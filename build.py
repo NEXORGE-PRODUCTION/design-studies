@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from html import escape as e
 from editorial import render, BRIEFS, SCENES
@@ -10,6 +11,8 @@ def nav(name,section):
 def art(slug,mode,cat):
  if mode.startswith('photo'):return f'<img class="photo" src="../assets/{slug}.jpg" alt="{e(cat)} editorial photograph">'
  return '<div class="art" aria-hidden="true"><i></i><i></i><i></i></div>'
+source_manifest=root/"originals.json"
+originals={r["slug"]:r for r in json.loads(source_manifest.read_text())} if source_manifest.exists() else {}
 gallery=[]
 for idx,(slug,name,cat,title,sub,section,*rest) in enumerate(designs):
  items=[item.split('~') for item in rest[:3]]
@@ -21,12 +24,16 @@ for idx,(slug,name,cat,title,sub,section,*rest) in enumerate(designs):
  def cards():
   return '<div class="cards">'+''.join(f'<a href="story-{j}.html"><img class="listing-img" loading="lazy" src="../assets/editorial/{SCENES[slug][-2+j%2]}.jpg" alt=""><small>{e(section)}</small><h3>{e(h)}</h3><p>{e(b)}</p><b>Explore ↗</b></a>' for j,(h,b) in enumerate(items))+'</div>'
  hero=art(slug,mode,cat)
- write('index.html',name,render(slug,name,cat,title,sub,section,items,mode))
+ write('interactive.html' if slug in originals else 'index.html',name,render(slug,name,cat,title,sub,section,items,mode))
  write('collection.html',section,f'<main><section><small>{e(name)}</small><h1>{e(section)}</h1><p>{e(sub)}</p>{cards()}</section></main>')
  for j,(h,b) in enumerate(items):
   nxt=(j+1)%len(items)
   write(f'story-{j}.html',h,f'<main><section class="hero"><div><small>{e(section)}</small><h1>{e(h)}</h1><p>{e(b)}</p><p>{e(BRIEFS[slug][2+j])}</p><a class="button" href="story-{nxt}.html">Next · {e(items[nxt][0])} →</a></div><img class="photo" src="../assets/editorial/{SCENES[slug][-2+j%2]}.jpg" alt=""></section><section><h2>{e(BRIEFS[slug][0])}</h2><p>{e(BRIEFS[slug][1])}</p><a href="index.html">Back to {e(name)} →</a></section></main>')
  write('studio.html','About '+name,f'<main><section><small>About the concept</small><h1>{e(name)}</h1><p>{e(sub)}</p><h2>{e(BRIEFS[slug][0])}</h2><p>{e(BRIEFS[slug][1])}</p><h2>What to explore</h2>{cards()}</section></main>')
+ if slug in originals:
+  name=originals[slug]['title']
+  cat='Original Figma design'
+  title='View full design'
  thumbnail=f'<img loading="lazy" src="assets/previews/{slug}.jpg" alt="{e(name)} homepage preview">'
  gallery.append(f'<a class="tile" style="--tile:#{bg};color:#{fg}" href="{slug}/">{thumbnail}<small>{e(cat)}</small><h3>{e(name)}</h3><span>{e(title)} ↗</span></a>')
 (root/'index.html').write_text(page('Portfolio','<header><strong>NEXORGE</strong><span>Design portfolio</span></header><main><section><small>Independent web concepts</small><h1>Design studies.</h1><div class="gallery">'+''.join(gallery)+'</div></section></main>','style.css','f7f6f0','163c32',''))
