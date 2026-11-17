@@ -17,7 +17,7 @@ for idx,(slug,name,cat,title,sub,section,*rest) in enumerate(designs):
  dark=slug in ['ember-table','ledger-counsel','orbit-mind']
  d=root/slug;d.mkdir(exist_ok=True)
  def write(file,label,body):
-  (d/file).write_text(page(label,nav(name,section)+body+'<footer>Nexorge Design Studies <span>Independent portfolio concept</span></footer>','../style.css',bg,fg,('dark ' if dark else '')+f'layout{idx%3}'))
+  (d/file).write_text(page(label,nav(name,section)+body+'<footer>Nexorge Design Studies <span>Independent portfolio concept</span></footer>','../style.css',bg,fg,('dark ' if dark else '')+f'layout{idx%3} site-{slug}'))
  def cards():
   return '<div class="cards">'+''.join(f'<a href="story-{j}.html"><small>{e(section)}</small><h3>{e(h)}</h3><p>{e(b)}</p><b>Explore ↗</b></a>' for j,(h,b) in enumerate(items))+'</div>'
  hero=art(slug,mode,cat)
@@ -27,5 +27,6 @@ for idx,(slug,name,cat,title,sub,section,*rest) in enumerate(designs):
   nxt=(j+1)%len(items)
   write(f'story-{j}.html',h,f'<main><section class="hero"><div><small>{e(section)}</small><h1>{e(h)}</h1><p>{e(b)}</p><a class="button" href="story-{nxt}.html">Next · {e(items[nxt][0])} →</a></div>{hero}</section></main>')
  write('studio.html','About '+name,f'<main><section><small>About the concept</small><h1>{e(name)}</h1><p>{e(sub)}</p><h2>What to explore</h2>{cards()}</section></main>')
- gallery.append(f'<a class="tile" style="--tile:#{bg};color:#{fg}" href="{slug}/"><small>{e(cat)}</small><h3>{e(name)}</h3><span>{e(title)} ↗</span></a>')
+ thumbnail=f'<img loading="lazy" src="assets/{slug}.jpg" alt="">' if mode.startswith("photo") else f'<div class="tile-art" aria-hidden="true"></div>'
+ gallery.append(f'<a class="tile" style="--tile:#{bg};color:#{fg}" href="{slug}/">{thumbnail}<small>{e(cat)}</small><h3>{e(name)}</h3><span>{e(title)} ↗</span></a>')
 (root/'index.html').write_text(page('Portfolio','<header><strong>NEXORGE</strong><span>Design portfolio</span></header><main><section><small>Independent web concepts</small><h1>Design studies.</h1><div class="gallery">'+''.join(gallery)+'</div></section></main>','style.css','f7f6f0','163c32',''))
